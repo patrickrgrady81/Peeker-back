@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 gem "pry-rails"
-gem 'rack-cors'
+gem "rack-cors", require:"rack/cors"
 
 
 ruby '2.6.1'
