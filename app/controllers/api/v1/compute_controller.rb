@@ -20,11 +20,17 @@ class API::V1::ComputeController < ApplicationController
       render json: {status: "IN DEAL"}
     when "DRAW"
       # calculate hand value
+      value = getHandValue
       # calculate odds
       # calculate best plays
-      render json: {status: "IN DRAW"}
+      render json: {status: "IN DRAW", handValue: value}
     end
   end
 
   private 
+
+  def getHandValue
+    handValue = "Nothing"
+    return handValue
+  end
 end
