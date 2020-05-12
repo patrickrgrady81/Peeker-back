@@ -11,16 +11,18 @@ class API::V1::ComputeController < ApplicationController
 
   def sent
     # params[:compute] is everthing sent here
+    hand = params[:compute][:hand]
     case params[:compute][:gameState]
     when "DEAL" 
-      # hand value is nothing
+      # calculate hand value
+      value = getHandValue(hand)
       # best plays is nothing
       # calculate payouts 
       # update credits
-      render json: {status: "IN DEAL"}
+      render json: {status: "IN DEAL", handValue: value}
     when "DRAW"
       # calculate hand value
-      value = getHandValue
+      value = getHandValue(hand)
       # calculate odds
       # calculate best plays
       render json: {status: "IN DRAW", handValue: value}
@@ -29,8 +31,17 @@ class API::V1::ComputeController < ApplicationController
 
   private 
 
-  def getHandValue
+  def getHandValue(hand)
+    #get the ids
+    # ids = []
     handValue = "Nothing"
+
+    sortedHand = hand.sort_by { |card| card["i"] }
+    
+    # Check for straight
+    # Check for flush
+
+
     return handValue
   end
 end
