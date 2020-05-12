@@ -10,6 +10,6 @@ class API::V1::ComputeController < ApplicationController
 
   def sent
     # params[:compute] is everthing sent here
-    render json: {"info": params[:compute]}
+    render json: {"got": params[:compute]}
   end
 end
