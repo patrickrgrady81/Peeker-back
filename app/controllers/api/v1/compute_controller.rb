@@ -42,6 +42,17 @@ class API::V1::ComputeController < ApplicationController
     # Check for flush
 
 
+    # One Pair
+    for i in 0..3 do 
+      if sortedHand[i]["v"] == sortedHand[i+1]["v"]
+        return "Pair of #{sortedHand[i]["v"]}s"
+      end
+    end
+
+
+    # High Card 
+    handValue = "High Card #{sortedHand[4]["v"]}"
+    handValue = "High Card Ace" if sortedHand[0]["i"] == 1
     return handValue
   end
 end
