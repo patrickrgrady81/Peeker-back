@@ -18,6 +18,7 @@ class API::V1::ComputeController < ApplicationController
       value = getHandValue(hand)
       # best plays is nothing
       # calculate payouts 
+      payout = getPayouts
       # update credits
       render json: {status: "IN DEAL", handValue: value}
     when "DRAW"
@@ -136,5 +137,9 @@ class API::V1::ComputeController < ApplicationController
     handValue = "High Card #{sortedHand[4]["v"]}"
     handValue = "High Card Ace" if sortedHand[0]["i"] == 1
     return handValue
+  end
+
+  def getPayouts
+
   end
 end
