@@ -12,6 +12,7 @@ class API::V1::ComputeController < ApplicationController
   def sent
     # params[:compute] is everthing sent here
     hand = params[:compute][:hand]
+
     case params[:compute][:gameState]
     when "DEAL" 
       # calculate hand value
@@ -21,9 +22,9 @@ class API::V1::ComputeController < ApplicationController
 
       # best plays is nothing
       # calculate payouts 
-      payout = getPayouts
+      payout = getPayouts(intValue)
       # update credits
-      render json: {status: "IN DRAW", handValue: value, intHandValue: intValue}
+      render json: {status: "IN DRAW", handValue: value, payout: payout}
     when "DRAW"
       # calculate hand value
       
@@ -37,10 +38,10 @@ class API::V1::ComputeController < ApplicationController
       
       # calculate odds
       # calculate best plays
-      render json: {status: "IN DRAW", handValue: value, intHandValue: intValue}
+      render json: {status: "IN DRAW", handValue: value, payout: 0}
     end
   end
-
+      
   private 
 
   def getHandValue(hand)
@@ -166,7 +167,26 @@ class API::V1::ComputeController < ApplicationController
     return [handValue, intHandValue]
   end
 
-  def getPayouts
+  def getPayouts(val)
+    payTable =
+    [
+      ["Credits", "Royal Flush", "Straight Flush", "Four of a Kind", "Full House",
+        "Flush", "Straight", "Three of a Kind", "Two Pair", "Jacks or Better"],
+        [1, 250, 50, 25, 9, 6, 4, 3, 2, 1],
+        [2, 500, 100, 50, 18, 12, 8, 6, 4, 2],
+        [3, 750, 150, 75, 27, 18, 12, 9, 6, 3],
+        [4, 1000, 200, 100, 36, 24, 16, 12, 8, 4],
+        [5, 4000, 250, 125, 45, 30, 20, 15, 10, 5]
+    ]
 
+    val = 9 - val + 1
+    bet = params[:compute][:bet]
+    pay = 0
+    
+    if val > 0
+      pay = payTable[bet][val]
+    end
+
+    return pay
   end
 end
