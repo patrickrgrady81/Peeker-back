@@ -84,8 +84,10 @@ class API::V1::ComputeController < ApplicationController
     # One Pair
     for i in 0..3 do 
       if sortedHand[i]["v"] == sortedHand[i+1]["v"]
-        intHandValue = 1
         handValue = "Pair of #{sortedHand[i]["v"]}s"
+        if sortedHand[i]["i"] > 10 || sortedHand[i]["i"] == 1
+          intHandValue = 1
+        end
       end
     end
     
