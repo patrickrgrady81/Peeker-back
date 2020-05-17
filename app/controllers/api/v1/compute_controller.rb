@@ -12,37 +12,58 @@ class API::V1::ComputeController < ApplicationController
   def sent
     # params[:compute] is everthing sent here
     hand = params[:compute][:hand]
+    gameState = params[:compute][:gameState]
 
-    case params[:compute][:gameState]
+    case gameState
+    when "START"
+      odds = getOdds(gameState, hand)
+      render json: {status: "IN START", handValue: null, payout: null, odds: odds}
+
     when "DEAL" 
       # calculate hand value
       val = getHandValue(hand)
       value = val[0]
       intValue = val[1]
 
+      odds = getOdds(gameState, hand)
+
       # best plays is nothing
       # calculate payouts 
       payout = getPayouts(intValue)
       # update credits
-      render json: {status: "IN DRAW", handValue: value, payout: payout}
+      render json: {status: "IN DRAW", handValue: value, payout: payout, odds: odds}
     when "DRAW"
       # calculate hand value
       
       val = getHandValue(hand)
       value = val[0]
       intValue = val[1]
-
-      
-      # binding.pry
-      
-      
+      odds = getOdds(gameState, hand)
       # calculate odds
       # calculate best plays
-      render json: {status: "IN DRAW", handValue: value, payout: 0}
+      render json: {status: "IN DRAW", handValue: value, payout: 0, odds: odds}
     end
   end
       
   private 
+
+  def getOdds(gameState, hand)
+    if gameState
+      totalHands =  1661102543100.0
+      return [
+        1,
+        sprintf( "%1.6f", (41126022.0 / totalHands) * 100),
+        sprintf( "%1.6f", (181573608.0 / totalHands) * 100),
+        sprintf( "%1.6f", (3924430647.0 / totalHands) * 100),
+        sprintf( "%1.6f", (19122956883.0 / totalHands) * 100),
+        sprintf( "%1.6f", (18296232180.0 / totalHands) * 100),
+        sprintf( "%1.6f", (18653130482.0 / totalHands) * 100),
+        sprintf( "%1.6f", (123666922527.0 / totalHands) * 100),
+        sprintf( "%1.6f", (214745513679.0 / totalHands) * 100),
+        sprintf( "%1.6f", (356447740914.0 / totalHands) * 100)
+      ]
+    end
+  end
 
   def getHandValue(hand)
     handValue = "Nothing"
