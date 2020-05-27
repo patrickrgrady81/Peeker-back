@@ -12,33 +12,30 @@ class API::V1::ComputeController < ApplicationController
   def sent
     # params[:compute] is everthing sent here
     hand = params[:compute][:hand]
+    deck = params[:compute][:deck]
     gameState = params[:compute][:gameState]
 
     case gameState
     when "START"
-      odds = getOdds(gameState, hand)
-      render json: {status: "IN START", handValue: null, payout: null, odds: odds}
+      render json: {status: "IN START", handValue: null, payout: null, odds: nil}
 
     when "DEAL" 
       # calculate hand value
       val = getHandValue(hand)
       value = val[0]
       intValue = val[1]
-
-      odds = getOdds(gameState, hand)
-
+      payout = getPayouts(intValue)
       # best plays is nothing
       # calculate payouts 
-      payout = getPayouts(intValue)
       # update credits
-      render json: {status: "IN DRAW", handValue: value, payout: payout, odds: odds}
+      render json: {status: "IN DRAW", handValue: value, payout: payout, odds: nil}
     when "DRAW"
       # calculate hand value
       
       val = getHandValue(hand)
       value = val[0]
       intValue = val[1]
-      odds = getOdds(gameState, hand)
+      odds = getOdds(gameState, hand, deck)
       # calculate odds
       # calculate best plays
       render json: {status: "IN DRAW", handValue: value, payout: 0, odds: odds}
@@ -47,21 +44,69 @@ class API::V1::ComputeController < ApplicationController
       
   private 
 
-  def getOdds(gameState, hand)
-    if gameState
-      totalHands =  1661102543100.0
+  def sim(simHand, newDeck, runIt)
+    numTimes = 0
+    totals = [0,0,0,0,0,0,0,0,0]
+    simHand.each do |hand|
+      runIt.times do |i|
+        numTimes += 1
+        # puts numTimes
+        newHand = []
+        newDeck.shuffle!
+
+        5.times do |i|
+          newHand << newDeck[i]
+        end
+        
+        val = getHandValue(newHand)
+        handVal = val[1]
+        totals[handVal] += 1
+      end
+    end
+    return totals, numTimes
+  end
+
+  def addToTotals(tot, totals)
+    totals.count.times do |i|
+      totals[i] += tot[i] 
+    end
+    return totals
+  end
+
+  def getOdds(gameState, hand, deck)
+    newDeck = deck
+    ret = nil
+    runIt = 1000
+    newHand = []
+    num = 32.0 # this should be 32 the number of combos with getting a new hand
+    totals = [0,0,0,0,0,0,0,0,0]
+    bestHands = [{
+      val: -1, hand: nil,
+      val: -1, hand: nil,
+      val: -1, hand: nil,
+      val: -1, hand: nil,
+      val: -1, hand: nil
+      }]
+    if gameState == "DRAW"
+      5.times do |i|
+        simHand = hand.combination(i).to_a #simulate draw 5 new cards
+        ret = sim(simHand, deck, runIt)
+        addToTotals(ret[0], totals)
+      end
       return [
         1,
-        sprintf( "%1.6f", (41126022.0 / totalHands) * 100),
-        sprintf( "%1.6f", (181573608.0 / totalHands) * 100),
-        sprintf( "%1.6f", (3924430647.0 / totalHands) * 100),
-        sprintf( "%1.6f", (19122956883.0 / totalHands) * 100),
-        sprintf( "%1.6f", (18296232180.0 / totalHands) * 100),
-        sprintf( "%1.6f", (18653130482.0 / totalHands) * 100),
-        sprintf( "%1.6f", (123666922527.0 / totalHands) * 100),
-        sprintf( "%1.6f", (214745513679.0 / totalHands) * 100),
-        sprintf( "%1.6f", (356447740914.0 / totalHands) * 100)
+        sprintf( "%1.6f", (totals[8] / (num * runIt)) * 100),
+        sprintf( "%1.6f", (totals[7] / (num * runIt)) * 100),
+        sprintf( "%1.6f", (totals[6] / (num * runIt)) * 100),
+        sprintf( "%1.6f", (totals[5] / (num * runIt)) * 100),
+        sprintf( "%1.6f", (totals[4] / (num * runIt)) * 100),
+        sprintf( "%1.6f", (totals[3] / (num * runIt)) * 100),
+        sprintf( "%1.6f", (totals[2] / (num * runIt)) * 100),
+        sprintf( "%1.6f", (totals[1] / (num * runIt)) * 100),
+        sprintf( "%1.6f", (totals[0] / (num * runIt)) * 100)
+
       ]
+      # return ret[1]
     end
   end
 
